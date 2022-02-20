@@ -48,7 +48,7 @@ Code folder:
 
 + **1\_2\_generate\_coefficients.R**
 	* Description: This code file generates field characteristics (e.g., *α*, *β*, *ymax*,..., etc.) data using unconditional Gaussian geostatistical simulation based on the spherical variogram model.
-	* Final output: `coef\_data.rds`
+	* Final output: `coef_data.rds`
 
 + **2\_1\_generate\_analysis\_data.R**
 	* Description: This code file simulates on-farm experiment data through assigning experimental nitrogen rates across the plots in the field, and calculate cell-level yield with the Mitscherlich-Baule production function. Then, the data sets are aggregated by subplot-level. 
