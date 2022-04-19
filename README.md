@@ -79,7 +79,7 @@ Code folder:
 	* Final output: `dt_TEcomparison.rds`
 
 + **4\_1\_Appendix\_generate\_coefficients.R**, **4\_2\_Appendix\_generate\_analysis\_data.R**, **4\_3\_Appendix\_MCsim\_Forest.R**, and **4\_4\_Appendix\_SimDataAnalysis.R**
-	* Descriptions: These code files conduct the same series of simulations ("1\_2\_generate\_coefficients.R" to "3\_1\_SimDataAnalysis.R") but with different yield error sizes. Please see the Appendix G in the manuscript for details.
+	* These code files conduct the same series of simulations ("1\_2\_generate\_coefficients.R" to "3\_1\_SimDataAnalysis.R") but with different yield error sizes. Please see the Appendix G in the manuscript for details.
 
 + **5\_prepare\_results.R**
 	* This code file prepares data to be used as an example of spatial distributions of field characteristics, a trial design, and generated yield. 
