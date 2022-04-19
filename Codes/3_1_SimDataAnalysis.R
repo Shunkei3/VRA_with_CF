@@ -27,7 +27,7 @@ library(parallel)
 source(here("Codes/0_1_functions_gen_analysis_data.R"))
 source(here("Codes/0_2_functions_main_sim.R"))
 
-# === Create a new folder to store the summary of simulation results  === #
+# === Create a new folder to store the summary of the simulation results  === #
 dir.create("./Data/for_writing")
 
 # === Prices ===#

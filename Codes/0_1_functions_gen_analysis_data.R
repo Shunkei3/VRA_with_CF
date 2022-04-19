@@ -527,7 +527,6 @@ gen_coefs <- function(mean, psill, range, coef_name, nsim, xy) {
 
 
 gen_coefs_par <- function(B, geo_xy, sp_range, psill_merror){
-  # geo_xy=xy; sp_range=400
   #/*--------------------------------------------------------*/
   #' ## Generate raw coefficients
   #/*--------------------------------------------------------*/

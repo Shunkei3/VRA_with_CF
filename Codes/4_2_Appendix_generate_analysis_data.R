@@ -57,7 +57,7 @@ saveRDS(test_raw_data, here("Data/test_raw_data_low_error.rds"))
 #/*----------------------------------------------------*/
 #' ## (1)-2 Generate subplot-level analysis datasets
 #/*----------------------------------------------------*/
-##== Aggregate Cell-Level Field Data to Subplot-Level Field Data ==##
+##== Aggregate Cell-level Field Data to Subplot-level Field Data ==##
 sim_data <- lapply(
 	1:100, function(x) {
 		# print(paste0("working on ", x, " th iteration."))

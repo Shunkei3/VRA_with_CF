@@ -64,7 +64,7 @@ test_raw_data <-
 	here("Data/test_raw_data.rds") %>%
 	readRDS()
 
-##== Aggregate Cell-Level Field Data to Subplot-Level Field Data ==##
+##== Aggregate Cell-level Field Data to Subplot-level Field Data ==##
 sim_data <- lapply(
 	1:1000, function(x) {
 		# print(paste0("working on ", x, " th iteration."))

@@ -63,13 +63,8 @@ te_case_data <-
    	) %>%
    	tibble()
 
-
-# === set up for parallel computations === #
-plan(multicore, workers = availableCores()-2)
-options(future.globals.maxSize= 850*1024^2)
-set.seed(1378)
-
 # === treatment effect calculation === #
+set.seed(1378)   	
 forest_te_dt <- 
 	te_case_data %>%
 	mutate(
