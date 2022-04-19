@@ -35,54 +35,54 @@ This dataset includes the R and Python codes and data for analysis presented in:
 ### List of Files:
 Data folder:
 + **`field_boundary.rds`**
-	* Description: A polygon boundary data of a field, which is used to generate a field polygon in **1\_1\_generate\_field.R**. 
+	* A polygon boundary data of a field, which is used to generate a field polygon in **1\_1\_generate\_field.R**. 
 + **`ctree_data.rds`**
-	* Description: Data to be used in creating an example causal tree in **PrepareResults.rmd**.
+	* Data to be used in creating an example causal tree in **PrepareResults.rmd**.
 
 Code folder:
 + **0\_1\_functions\_gen\_analysis\_data.R**
-	* Description: This code file contains functions to generate field characteristics (e.g., *α*, *β*, *ymax*, etc.) and yield datasets.
+	* This code file contains functions to generate field characteristics (e.g., *α*, *β*, *ymax*, etc.) and yield datasets.
 
 + **0\_2\_functions\_main\_sim.R**
-	* Description: This code file contains functions to conduct Random Forest (RF), Boosted Random Forest (BRF), and Causal Forest (CF) analysis to predict yields and EONRs site-specifically.
+	* This code file contains functions to conduct Random Forest (RF), Boosted Random Forest (BRF), and Causal Forest (CF) analysis to predict yields and EONRs site-specifically.
 
 + **1\_1\_generate_field.R**
-	* Description: This code file creates various size of grids (i.e., "plots", "subplots", and "cells") within a field.
+	* This code file creates various size of grids (i.e., "plots", "subplots", and "cells") within a field.
 	* Final output: `analysis_field.rds`
 
 + **1\_2\_generate\_coefficients.R**
-	* Description: This code file generates field characteristics (e.g., *α*, *β*, *ymax*,..., etc.) data using unconditional Gaussian geostatistical simulation based on the spherical variogram model.
+	* This code file generates field characteristics (e.g., *α*, *β*, *ymax*,..., etc.) data using unconditional Gaussian geostatistical simulation based on the spherical variogram model.
 	* Final output: `coefficients_sprange_400.rds`
 
 + **1\_3\_generate\_analysis\_data.R**
-	* Description: This code file simulates on-farm experiment data through assigning experimental nitrogen rates across the plots in the field, and calculating cell-level yield with the Mitscherlich-Baule production function. Then, the datasets are aggregated by subplot-level. 
+	* This code file simulates on-farm experiment data through assigning experimental nitrogen rates across the plots in the field, and calculating cell-level yield with the Mitscherlich-Baule production function. Then, the datasets are aggregated by subplot-level. 
 	* Final output: 
 		- Cell-level output: `reg_raw_data.rds`, `test_raw_data.rds`
 		- Subplot-level output: `reg_data.rds`, `test_data.rds`
 			+ NOTE: Cell-level outputs will be used for CNN analysis, and subplot-level outputs will be used for RF, BRF and CF analysis. 
 
 + **2\_1\_MCsim\_Forest.R**
-	* Description: This code file conducts one thousand simulations of RF, BRF and CF analysis to predict yields (only for RF and BRF) and EONRs site-specifically. 
+	* This code file conducts one thousand simulations of RF, BRF and CF analysis to predict yields (only for RF and BRF) and EONRs site-specifically. 
 	* Final output: `forest_SimRes_alpha_beta_ymax.rds`, `forest_SimRes_alpha_beta_ymax_theta_1_theta_2.rds`, `forest_SimRes_alpha1_alpha2_beta1_beta2_ymax1_ymax2.rds`, `forest_SimRes_alpha1_alpha2_beta1_beta2_ymax1_ymax2_theta_1_theta_2.rds`
 
 + **2\_2\_1\_MCsim\_CNN\_aby.py**, **2\_2\_2\_MCsim\_CNN\_abytt.py**, **2\_2\_3\_MCsim\_CNN\_aabbyy.py**, and **2\_2\_4\_MCsim\_CNN\_aabbyytt.py**
-	* Description: Each of these code files conducts one thousand simulations of yield prediction using Convolutional Neural Network (CNN) by modeling scenario. 
+	* Each of these code files conducts one thousand simulations of yield prediction using Convolutional Neural Network (CNN) by modeling scenario. 
 	* Final output: `output_..._.csv` 
 		- NOTE: `...` refers to the simulation number. 
 
 + **3\_1\_SimDataAnalysis.R**
-	* Description: This code file calculates RMSE of predicted EONRs and yields by ML method and modeling scenario. 
+	* This code file calculates RMSE of predicted EONRs and yields by ML method and modeling scenario. 
 	* Final output: `allML_summary_bySim.rds`
 
 + **3\_2\_CompTeEstimation.R**
-	* Description: This code file estimates treatment effect by treatment type and ML method under the "aabbyytt" scenario in one of the one thousand simulation rounds. The output data is used to create Figure 6: "True treatment effects vs estimated treatment effects (scenario: aabbyytt)"
+	* This code file estimates treatment effect by treatment type and ML method under the "aabbyytt" scenario in one of the one thousand simulation rounds. The output data is used to create Figure 6: "True treatment effects vs estimated treatment effects (scenario: aabbyytt)"
 	* Final output: `dt_TEcomparison.rds`
 
 + **4\_1\_Appendix\_generate\_coefficients.R**, **4\_2\_Appendix\_generate\_analysis\_data.R**, **4\_3\_Appendix\_MCsim\_Forest.R**, and **4\_4\_Appendix\_SimDataAnalysis.R**
 	* Descriptions: These code files conduct the same series of simulations ("1\_2\_generate\_coefficients.R" to "3\_1\_SimDataAnalysis.R") but with different yield error sizes. Please see the Appendix G in the manuscript for details.
 
 + **5\_prepare\_results.R**
-	* Description: This code file prepares data to be used as an example of spatial distributions of field characteristics, a trial design, and generated yield. 
+	* This code file prepares data to be used as an example of spatial distributions of field characteristics, a trial design, and generated yield. 
 
 + **PrepareResults.rmd**
-	* Description: This code file creates all the figures and tables which are used in the manuscript. 
+	* This code file creates all the figures and tables which are used in the manuscript. 
