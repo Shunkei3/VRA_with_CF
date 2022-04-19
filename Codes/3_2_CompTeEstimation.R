@@ -1,6 +1,6 @@
-#/*----------------------------------*/
-#' ## Preparation
-#/*----------------------------------*/
+# /*=================================================*/
+#' # Preparation
+# /*=================================================*/
 library(here)
 library(ggplot2)
 library(grf)
@@ -11,21 +11,29 @@ library(tidyverse)
 library(ggthemes)
 library(future.apply)
 
-# === Load Functions === #
+
+#/*----------------------------------*/
+#' ## Preparation
+#/*----------------------------------*/
+
+#--- source functions ---#
 source(here("Codes/0_1_functions_gen_analysis_data.R"))
 source(here("Codes/0_2_functions_main_sim.R"))
 
-# === Load Data Sets === # 
+
+#--- load data ---#  
 reg_data_all <- readRDS(here("Data/reg_data.rds"))
 test_data_all <- readRDS(here("Data/test_data.rds"))
 
-# === Pick a single simulation round === #
-x = 806
+
+#--- pick a single simulation round ---#
+x=806
 reg_data_sample <- reg_data_all[sim==x & padding==1,]
 test_data_sample <- test_data_all[sim==x & padding==1,]
 N_levels <- reg_data_sample$rate%>%unique()%>%sort()
 
 subplots_infiled <- reg_data_sample[,unique_subplot_id] %>% unique()
+
 
 # --- true treatment effect data set --- #
 true_te_dt <- 
@@ -40,18 +48,20 @@ true_te_dt <-
 
 
 # /*================================================================*/
-#' # (1) Treatment Effect Calculation by CF-base, RF, BRF
+#' # (1) Treatment Effect Estimation of CF-base, RF, BRF
 # /*================================================================*/
 # === all the cases to be considered === #
-var_ls_variations <- list(
-    c("alpha1", "alpha2", "beta1", "beta2", "ymax1", "ymax2", "theta_1", "theta_2")
+te_var_ls_variations <- 
+	list(
+    	c("alpha1", "alpha2", "beta1", "beta2", "ymax1", "ymax2", "theta_1", "theta_2")
     )
 
-te_case_data <- expand.grid(
-    var_ls = var_ls_variations,
-    Method = c("CF_base", "BRF", "RF")    
-  ) %>%
-  tibble()
+te_case_data <- 
+	expand.grid(
+    	var_ls = te_var_ls_variations,
+   		Method = c("CF_base", "BRF", "RF")    
+   	) %>%
+   	tibble()
 
 
 # === set up for parallel computations === #
@@ -59,12 +69,11 @@ plan(multicore, workers = availableCores()-2)
 options(future.globals.maxSize= 850*1024^2)
 set.seed(1378)
 
-
 # === treatment effect calculation === #
 forest_te_dt <- 
 	te_case_data %>%
 	mutate(
-		te_data = future_lapply(
+		te_data = lapply(
 			seq_len(nrow(.)),
 			function(x) {
 				get_te_dt(
@@ -74,7 +83,7 @@ forest_te_dt <-
             	rates_ls = N_levels,
             	Method = .$Method[[x]]
             	)
-			}, future.seed = TRUE
+			}
     	)
   	)%>%
   	unnest(., cols= "te_data")%>%
@@ -85,14 +94,14 @@ forest_te_dt <-
 
 
 # /*================================================================*/
-#' # (2) Treatment Effect Calculation by CNN
+#' # (2) Treatment Effect Estimation of CNN
 # /*================================================================*/
 
-# === Load CNN Results (case: aabbyytt) === #
+# === load CNN results (case: aabbyytt) === #
 res_cnn <- 
 	fread(here("Data/CNN_rawRes_onEval/alldata_model4.csv"))%>%
 	setnames("pred", "yield_hat")%>%
-	.[sim==1, rate %in% N_levels, .(id, rate, yield_hat, sim)] %>%
+	.[sim==x, rate %in% N_levels, .(id, rate, yield_hat, sim)] %>%
 	.[, c("subplot_id", "strip_id") := tstrsplit(id, "_", fixed=TRUE)] %>%
   	.[,unique_subplot_id := paste0(strip_id,"_",subplot_id)] %>%
   	.[unique_subplot_id %in% subplots_infiled, ] %>%
@@ -107,7 +116,9 @@ cnn_te_dt <-
     .[, .(Method, unique_subplot_id, rate, te_base)]
 
 
-# === Merge the results with forest_te_dt === #
+# /*=================================================*/
+#' # Merge the results
+# /*=================================================*/
 te_comp_dt <- 
 	rbind(forest_te_dt, cnn_te_dt) %>%
 	true_te_dt[., on = c("unique_subplot_id", "rate")] %>%
@@ -118,16 +129,14 @@ te_comp_dt <-
 		rate == N_levels[4] ~ "N1-N4",
 		rate == N_levels[5] ~ "N1-N5"
 	)]
-	
 
 
-saveRDS(te_comp_dt, here("Data/dt_TEcomparison.rds"))
+saveRDS(te_comp_dt, here("Data/for_writing/dt_TEcomparison.rds"))
 
 
 #/*----------------------------------*/
-#' ## Visualization
+#' ## Quick Visualization
 #/*----------------------------------*/
-
 ggplot(te_comp_dt)+
 	geom_point(aes(x=true_te_base, y=te_base), size=0.5)+
 	facet_grid(Treatment ~ Method) +

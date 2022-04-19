@@ -30,21 +30,50 @@ xy <- dplyr::select(field, unique_cell_id) %>%
   data.table()
 
 # --- Number of iterations --- #
-b = 1000
+b = 100
 # --- Range (m) --- #
 Range = 400
+
+
+#/*-------------------------------------*/
+#' ## (1) Small degree of yield error
+#/*-------------------------------------*/
 # --- yield error size  --- #
-Error = 0.015 
+Error_small = 0.0075
 
 # === Generate coefficients === #
-coef_data <- 
+set.seed(39476)
+
+coef_data_low <- 
   gen_coefs_par(
     B = b, 
     geo_xy = xy,
     sp_range = Range,
-    psill_merror = Error
+    psill_merror = Error_small
     )
 
-saveRDS(coef_data, here("Data/", paste0('coefficients_sprange_',Range,'.rds')))
+
+saveRDS(coef_data_low, here("Data/", paste0('coefficients_sprange_',Range,'_low_error.rds')))
+
+
+
+#/*-------------------------------------*/
+#' ## (2) Large degree of yield error
+#/*-------------------------------------*/
+# --- yield error size --- #
+Error_large = 0.0225
+
+# === Generate coefficients === #
+set.seed(57864)
+
+coef_data_high <- 
+  gen_coefs_par(
+    B = b, 
+    geo_xy = xy,
+    sp_range = Range,
+    psill_merror = Error_large
+    )
+
+saveRDS(coef_data_high, here("Data/", paste0('coefficients_sprange_',Range,'_high_error.rds')))
 
 

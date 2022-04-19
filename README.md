@@ -48,20 +48,21 @@ Code folder:
 
 + **1\_2\_generate\_coefficients.R**
 	* Description: This code file generates field characteristics (e.g., *α*, *β*, *ymax*,..., etc.) data using unconditional Gaussian geostatistical simulation based on the spherical variogram model.
-	* Final output: `coef_data.rds`
+	* Final output: `coefficients_sprange_400.rds`
 
-+ **2\_1\_generate\_analysis\_data.R**
++ **1\_3\_generate\_analysis\_data.R**
 	* Description: This code file simulates on-farm experiment data through assigning experimental nitrogen rates across the plots in the field, and calculate cell-level yield with the Mitscherlich-Baule production function. Then, the data sets are aggregated by subplot-level. 
 	* Final output: 
-		- Cell-levle output: `reg_raw_data.rds`, `test_raw_data.rds`
+		- Cell-level output: `reg_raw_data.rds`, `test_raw_data.rds`
 		- Subplot-level output: `reg_data.rds`, `test_data.rds`
+			+ NOTE: Cell-level outputs will be used for CNN analysis, and subplot-level output will be used for RF, BRF and CNN analysis. 
 
-+ **2\_2\_Forest\_main\_sim.R**
++ **2\_1\_MCsim\_Forest.R**
 	* Description: This code file conducts one thousand simulation of RF, BRF and CF analysis to predict yields (only for RF and BRF) and EONRs site-specifically. 
 	* Final output: `forest_SimRes_alpha_beta_ymax.rds`, `forest_SimRes_alpha_beta_ymax_theta_1_theta_2.rds`, `forest_SimRes_alpha1_alpha2_beta1_beta2_ymax1_ymax2.rds`, `forest_SimRes_alpha1_alpha2_beta1_beta2_ymax1_ymax2_theta_1_theta_2.rds`
-		
-+ **2\_3\_CNN\_main\_sim\_aabbyytt.py**	
-	* Description: This code file conducts one thousand simulation of yield prediction using Convolutional Neural Network (CNN) by modeling scenario. Depending on which modeling scenario is used, you need to arrange the input data and architecture.
+
++ **2\_2\_1\_MCsim\_CNN\_aby.py**, **2\_2\_2\_MCsim\_CNN\_abytt.py**, **2\_2\_3\_MCsim\_CNN\_aabbyy.py**, **2\_2\_4\_MCsim\_CNN\_aabbyytt.py**
+	* Description: Each of these code files conducts one thousand simulation of yield prediction using Convolutional Neural Network (CNN) by modeling scenario. 
 	* Final output: `output_..._.csv` 
 		- NOTE: `...` refers to the simulation number. 
 
@@ -70,10 +71,13 @@ Code folder:
 	* Final output: `allML_summary_bySim.rds`
 
 + **3\_2\_CompTeEstimation.R**
-	* Description: This code file estimates treatment effect by treatment type and ML method under the "aabbyytt" scenario in one of the one thousand simulations rounds. The output data is used to create Figure 5: "True treatment effects vs estimated treatment effects (scenario: aabbyytt)"
+	* Description: This code file estimates treatment effect by treatment type and ML method under the "aabbyytt" scenario in one of the one thousand simulations rounds. The output data is used to create Figure 6: "True treatment effects vs estimated treatment effects (scenario: aabbyytt)"
 	* Final output: `dt_TEcomparison.rds`
 
-+ **4\_prepare\_results.R**
++ **4\_1\_Appendix\_generate\_coefficients.R**, **4\_2\_Appendix\_generate\_analysis\_data.R**, **4\_3\_Appendix\_MCsim\_Forest.R**, **4\_4\_Appendix\_SimDataAnalysis.R**
+	* Descriptions: These code files conduct the series of simulations (throught 1\_2\_generate\_coefficients.R to 2\_1\_MCsim\_Forest.R) for different yield error sizes. Please see the Appendix G in the manuscript for details.
+
++ **5\_prepare\_results.R**
 	* Description: This code file prepares data to be used for showing an example of spatial distributions of field characteristics, a trial design, and generated yield. 
 
 + **PrepareResults.rmd**

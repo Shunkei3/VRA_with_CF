@@ -1,5 +1,6 @@
 # ==========================================================================
 # Objective:
+# For main simulation, 
 #' + Calculate profit-deficits and RMSE of EONR 
 #' + Calculate RMSE of yield predictions for RF, BRF and CNN
 #'      + For CNN results, estimate  EONR in this codes
@@ -20,10 +21,14 @@ library(hrbrthemes)
 library(tidyverse)
 library(ggpubr)
 library(here)
+library(parallel)
 
 # === Source Functions === #
 source(here("Codes/0_1_functions_gen_analysis_data.R"))
 source(here("Codes/0_2_functions_main_sim.R"))
+
+# === Create a new folder to store the summary of simulation results  === #
+dir.create("./Data/for_writing")
 
 # === Prices ===#
 pCorn <- price_table[2, pCorn]
@@ -49,7 +54,7 @@ subplots_infiled <- source_dt[,unique_subplot_id] %>% unique()
 
 
 # ==========================================================================
-# 1. Results of RF, BRF and CF
+# 1. Forest simulation regression results 
 # ==========================================================================
 
 # /*=================================================*/
@@ -82,7 +87,7 @@ forest_simRes_all <-
 #' # RMSE of EONRs and Profit-deficits calculation
 # /*=================================================*/
 forest_optN_piLoss <- 
-    source_dt[, !c("rate", "yield", "opt_N")] %>%
+    source_dt[, !c("yield", "opt_N")] %>%
     forest_simRes_all[, on=c("sim", "type", "unique_subplot_id")] %>%
     .[,`:=`(
         max_pi = pCorn*gen_yield_MB(ymax, alpha, beta, opt_N) - pN*opt_N,
@@ -98,19 +103,22 @@ forest_summary_bySim <-
         rmse_y = rmse_general(pred_yield, yield)
     ), by= .(sim, type, Method, Model)]
 
-# === Summarize by Method and Model === #
-forest_summary_bySim %>%
-    .[, .(
-        mean_rmse_optN = mean(rmse_optN),
-        mean_pi_loss = mean(pi_loss),
-        mean_rmse_y = mean(rmse_y)
-        ), by=.(type, Method, Model)] %>%
-    .[order(type, Method)]
+saveRDS(forest_summary_bySim, here("Data/for_writing/forest_summry_bySim.rds"))
+
+
+# === Check Summary of the Results of RF, BRF, and CF === #
+# forest_summary_bySim %>%
+#     .[, .(
+#         mean_rmse_optN = mean(rmse_optN),
+#         mean_pi_loss = mean(pi_loss),
+#         mean_rmse_y = mean(rmse_y)
+#         ), by=.(type, Method, Model)] %>%
+#     .[order(type, Method)]
 
 
 
 # ==========================================================================
-# 2.  Results of CNN
+# 2.  CNN results
 # ==========================================================================
 
 # /*=================================================*/
@@ -141,7 +149,8 @@ res_cnn_onEval <-
 
 # === Combine to one data set=== #
 cnn_simRes_all <- 
-    rbind(res_cnn_onTrain, res_cnn_onEval) %>%
+    res_cnn_onEval %>%
+    # rbind(res_cnn_onTrain, res_cnn_onEval) %>%
     .[,Model := case_when(
         Model == 1 ~ "aby",
         Model == 2 ~ "abytt",
@@ -167,17 +176,29 @@ cnn_simRes_all <-
 # Confirm that the predicted yield response functions are always linear
 cnn_simRes_temp <- 
     cnn_simRes_all %>%
-    .[type=="test" & sim==1 & unique_subplot_id %in% subplots_infiled[1:100],]
+    .[type=="test" & Model == "aabbyytt" & sim==296 & unique_subplot_id %in% subplots_infiled[1:12],]
+
 
 ggplot(cnn_simRes_temp, aes(x=rate, y=pred_yield, colour=factor(unique_subplot_id))) +
     geom_point(size = 0.7) +
-    geom_smooth(method=lm, se=FALSE, size=0.3) +
+    # geom_smooth(method=lm, se=FALSE, size=0.3) +
     facet_wrap(~Model, ncol = 2) +
     theme(
         legend.title = element_blank(),
         legend.position = "none"
     )
 
+ggplot(cnn_simRes_temp) +
+    geom_point(aes(x=rate, y=pred_yield, colour=factor(unique_subplot_id)),size = 1) +
+    geom_line(aes(x=rate, y=pred_yield, color = factor(unique_subplot_id))) +
+    facet_wrap(~unique_subplot_id, ncol = 3, scales = "free") +
+    # geom_line(aes(x=rate, y=yield, color = factor(unique_subplot_id)), linetype = "dashed") +
+    labs(y = "Yield (kg/ha)") +
+    labs(x = "N (kg/ha)") +
+    theme(
+        legend.title = element_blank(),
+        legend.position = "none"
+    )
 
 #/*----------------------------------*/
 #' ## EONR estimation
@@ -202,8 +223,10 @@ cal_slope <- function(case){
     .[, .(slope = coef(lm(pred_yield~rate))["rate"]), by= .(type, Model, sim, unique_subplot_id)]
 }
 
-slope_dt <- mclapply(all_var_case, cal_slope, mc.cores=detectCores()-2)%>%
+slope_dt <- 
+    mclapply(all_var_case, cal_slope, mc.cores=detectCores()-2)%>%
     rbindlist()
+
 
 # === EONR Estimation === #
 pN_pC_ratio <- pN/pCorn
@@ -216,7 +239,7 @@ cnn_optN_dt <-
             , by=.(type, Model, sim, unique_subplot_id)]
 
 # /*=================================================*/
-#' # RMSE of EONRs and Profit-deficits Calculation
+#' # RMSE of EONRs and Yields and Profit-loss Calculation
 # /*=================================================*/
 cnn_optN_piLoss <- 
     source_dt %>%
@@ -224,7 +247,8 @@ cnn_optN_piLoss <-
     .[,`:=`(
         max_pi = pCorn*gen_yield_MB(ymax, alpha, beta, opt_N) - pN*opt_N,
         pi =  pCorn*gen_yield_MB(ymax, alpha, beta, opt_N_hat) - pN*opt_N_hat)] %>%
-    .[, pi_loss := max_pi - pi]
+    .[, pi_loss := max_pi - pi] %>%
+    .[, Method := "CNN"]
 
 
 # === Summarize by Simulation Round === #
@@ -234,18 +258,19 @@ cnn_summry_bySim <-
         rmse_optN = rmse_general(opt_N_hat, opt_N),
         pi_loss = mean(pi_loss),
         rmse_y = rmse_general(pred_yield, yield)
-    ), by= .(sim, type, Model)] %>%
-    .[, Method := "CNN"] %>%
+    ), by= .(sim, type, Method, Model)] %>%
     .[,.(sim, type, Method, Model, rmse_optN, pi_loss, rmse_y)]
 
+saveRDS(cnn_summry_bySim, here("Data/for_writing/cnn_summry_bySim.rds"))
+
 # === Check Summary of the CNN Results === #
-cnn_summry_bySim %>%
-    .[, .(
-        mean_rmse_optN = mean(rmse_optN),
-        mean_pi_loss = mean(pi_loss),
-        mean_rmse_y = mean(rmse_y)
-        ), by=.(type, Model)] %>%
-    .[order(type)]
+# cnn_summry_bySim %>%
+#     .[, .(
+#         mean_rmse_optN = mean(rmse_optN),
+#         mean_pi_loss = mean(pi_loss),
+#         mean_rmse_y = mean(rmse_y)
+#         ), by=.(type, Model)] %>%
+#     .[order(type)]
 
 
 
@@ -258,7 +283,13 @@ allML_summary_bySim <-
   .[, Method := factor(Method, levels = c("RF", "BRF", "CNN", "CF_base"))] %>%
   .[, Model := factor(Model, levels = c("aby", "abytt", "aabbyy", "aabbyytt"))]
 
-saveRDS(allML_summary_bySim, here("Data/allML_summary_bySim.rds"))
+saveRDS(allML_summary_bySim, here("Data/for_writing/allML_summary_bySim.rds"))
+
+
+
+
+
+
 
 
 

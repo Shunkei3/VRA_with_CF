@@ -16,11 +16,10 @@ library(mapedit)
 
 
 # === Load Functions === #
-source(here("Codes", "0_1_functions_gen_analysis_data.R"))
+source(here("Codes/0_1_functions_gen_analysis_data.R"))
 
 # === Load an Actual Field Boundary Data === #
 field_boundary <- readRDS(here("Data/field_boundary.rds"))
-
 
 # /*=================================================*/
 #' # 1. Base Field 
@@ -38,7 +37,6 @@ ab_line <- rbind(
   c(wf_bbox["xmin"], wf_bbox["ymax"])
 ) %>%
   st_linestring()
-
 
 starting_point <- c(wf_bbox["xmin"] - 100, wf_bbox["ymin"] - 100)
 
@@ -166,7 +164,7 @@ field_grid_within_subplot <-
   mapedit:::combine_list_of_sf()
 
 # --- Merge with field_expd --- #
-analysis_field <- 
+analysis_field_raw <- 
   left_join(
     field_grid_within_subplot, st_drop_geometry(field_expd), by="unique_cell_id")%>%
     cbind(., st_coordinates(st_centroid(.)))%>%
@@ -177,7 +175,7 @@ analysis_field <-
 
 # ggplot()+
 #   geom_sf(data=field_base, fill="green", size=0, alpha=0.6) +
-#   geom_sf(data=analysis_field, fill=NA)
+#   geom_sf(data=analysis_field_raw, fill=NA)
 
 # /*========================================*/
 #' 4. Create "padding" indicator
@@ -186,7 +184,7 @@ analysis_field <-
 base_bdary <- st_union(field_base)
 
 padding_idx <- 
-  analysis_field %>%
+  analysis_field_raw %>%
   st_centroid() %>%
   dplyr::select(unique_cell_id) %>%
   mutate(
@@ -195,6 +193,6 @@ padding_idx <-
   st_drop_geometry()%>%
   data.table()
 
-analysis_field <- left_join(analysis_field, padding_idx, by="unique_cell_id")
+analysis_field <- left_join(analysis_field_raw, padding_idx, by="unique_cell_id")
 
-saveRDS(analysis_field, here("Data/for_Simulations/field_analysis.rds"))
+saveRDS(analysis_field, here("Data/analysis_field.rds"))

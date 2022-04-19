@@ -444,3 +444,11 @@ RF_BRF_calculate_te <- function(test_data, f_results, var_ls, N_levels) {
 
 # temp_BRF <- BRF_run(reg_data=reg_data_sample, var_ls=c("alpha","beta","ymax"), cl_id = NA)
 
+
+# === Function for RMSE Calculation === #
+rmse_general <-function(preds,actual){ 
+  sqrt(mean((actual - preds)^2)) %>%
+  round(.,1) %>%
+  format(, nsmall = 1)
+
+}

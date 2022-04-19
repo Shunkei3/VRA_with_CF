@@ -3,45 +3,30 @@ import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
 
 from sklearn.model_selection import train_test_split
-from matplotlib import pyplot as plt
 from sklearn.metrics import r2_score, mean_squared_error
 
 from numpy.random import seed
 from sklearn.preprocessing import StandardScaler
 
-import graphviz
-from datetime import date
 import time
 import pyreadr
 
-
-import os
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optimizers
 from torch.autograd import Variable
-import torch.nn.functional as F
-from torchsummary import summary
-from torch.utils.data import Dataset, DataLoader
-import torchvision
-import torchvision.transforms as transforms
-from sklearn.metrics import accuracy_score
-from torchviz import make_dot
 
 import math
 
-# This code implement CNNN regression model for 'aabbyytt' model
-# For the other models such as 'aby' and 'aabbyy', input data and architecture must be arranged.
+#-- Load data
+reg_raw_data = pyreadr.read_r('.Input/reg_raw_data.rds') # Please change the path
+test_raw_data = pyreadr.read_r('.Input/test_raw_data.rds') # Please change the path
 
-#-- Data load and prep.
-t = time.time()
-reg_raw_data = pyreadr.read_r('reg_raw_data.rds') 
-test_raw_data = pyreadr.read_r('test_raw_data.rds') 
 df = reg_raw_data[None]
 df2 = test_raw_data[None]
 
-#-- Define functions
+#-- Define functions for simulation
+
 # Dimension transformation for Torch
 def DimTrans(A):
     B = np.zeros([A.shape[0],A.shape[3],A.shape[1],A.shape[2]])
@@ -88,7 +73,7 @@ def batch_pred(X):
         x = x + batch_size
     return pred_list
 
-#-- Model Architecture (Barbosa model LF)
+#-- Model architecture
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class CNN_LF(nn.Module):
@@ -188,23 +173,7 @@ class CNN_LF(nn.Module):
         x = self.regressor(x)
         return x
 
-# Visualize model architecture
-batch_size = 1
-x0 = torch.randn(batch_size, 1, 6, 6)
-x1 = torch.randn(batch_size, 1, 6, 6)
-x2 = torch.randn(batch_size, 1, 6, 6)
-x3 = torch.randn(batch_size, 1, 6, 6)
-x4 = torch.randn(batch_size, 1, 6, 6)
-x5 = torch.randn(batch_size, 1, 6, 6)
-x6 = torch.randn(batch_size, 1, 6, 6)
-x7 = torch.randn(batch_size, 1, 6, 6)
-x8 = torch.randn(batch_size, 1)
-
-model = CNN_LF()
-print(model)
-
-
-#-- Training and prediction for test dataset.
+#-- Run 1000 simulations
 epoch_list =[]
 rsqTrain_list = []
 rsqVal_list = []
@@ -215,9 +184,10 @@ rmseTest_list =[]
 
 dim = 9
 
-iterMax = 1
-simIDs = [1000]
-for simID in simIDs:
+simIDs = np.unique(df.sim)
+iterMax = len(simIDs)
+for simID in np.unique(df.sim):
+    
     print('Simulation N: {}/{}'.format(simID,iterMax))
     t = time.time()
     
@@ -225,41 +195,41 @@ for simID in simIDs:
     data2 = df2[df2.sim==simID]
     
     # Standardization prcess
-    scaler_alpha1 = StandardScaler().fit(data[['alpha1']])
-    data.alpha1 = scaler_alpha1.transform(data[['alpha1']])
-    data2.alpha1 = scaler_alpha1.transform(data2[['alpha1']])
+    scaler_alpha1 = StandardScaler().fit(data[['alpha1']].values)
+    data.alpha1 = scaler_alpha1.transform(data[['alpha1']].values)
+    data2.alpha1 = scaler_alpha1.transform(data2[['alpha1']].values)
     
-    scaler_alpha2 = StandardScaler().fit(data[['alpha2']])
-    data.alpha2 = scaler_alpha2.transform(data[['alpha2']])
-    data2.alpha2 = scaler_alpha2.transform(data2[['alpha2']])
+    scaler_alpha2 = StandardScaler().fit(data[['alpha2']].values)
+    data.alpha2 = scaler_alpha2.transform(data[['alpha2']].values)
+    data2.alpha2 = scaler_alpha2.transform(data2[['alpha2']].values)
 
-    scaler_beta1 = StandardScaler().fit(data[['beta1']])
-    data.beta1 = scaler_beta1.transform(data[['beta1']])
-    data2.beta1 = scaler_beta1.transform(data2[['beta1']])
+    scaler_beta1 = StandardScaler().fit(data[['beta1']].values)
+    data.beta1 = scaler_beta1.transform(data[['beta1']].values)
+    data2.beta1 = scaler_beta1.transform(data2[['beta1']].values)
 
-    scaler_beta2 = StandardScaler().fit(data[['beta2']])
-    data.beta2 = scaler_beta2.transform(data[['beta2']])
-    data2.beta2 = scaler_beta2.transform(data2[['beta2']])
+    scaler_beta2 = StandardScaler().fit(data[['beta2']].values)
+    data.beta2 = scaler_beta2.transform(data[['beta2']].values)
+    data2.beta2 = scaler_beta2.transform(data2[['beta2']].values)
 
-    scaler_ymax1 = StandardScaler().fit(data[['ymax1']])
-    data.ymax1 = scaler_ymax1.transform(data[['ymax1']])
-    data2.ymax1 = scaler_ymax1.transform(data2[['ymax1']])
+    scaler_ymax1 = StandardScaler().fit(data[['ymax1']].values)
+    data.ymax1 = scaler_ymax1.transform(data[['ymax1']].values)
+    data2.ymax1 = scaler_ymax1.transform(data2[['ymax1']].values)
 
-    scaler_ymax2 = StandardScaler().fit(data[['ymax2']])
-    data.ymax2 = scaler_ymax2.transform(data[['ymax2']])
-    data2.ymax2 = scaler_ymax2.transform(data2[['ymax2']])
+    scaler_ymax2 = StandardScaler().fit(data[['ymax2']].values)
+    data.ymax2 = scaler_ymax2.transform(data[['ymax2']].values)
+    data2.ymax2 = scaler_ymax2.transform(data2[['ymax2']].values)
     
-    scaler_theta_1 = StandardScaler().fit(data[['theta_1']])
-    data.theta_1 = scaler_theta_1.transform(data[['theta_1']])
-    data2.theta_1 = scaler_theta_1.transform(data2[['theta_1']])
+    scaler_theta_1 = StandardScaler().fit(data[['theta_1']].values)
+    data.theta_1 = scaler_theta_1.transform(data[['theta_1']].values)
+    data2.theta_1 = scaler_theta_1.transform(data2[['theta_1']].values)
     
-    scaler_theta_2 = StandardScaler().fit(data[['theta_2']])
-    data.theta_2 = scaler_theta_2.transform(data[['theta_2']])
-    data2.theta_2 = scaler_theta_2.transform(data2[['theta_2']])
+    scaler_theta_2 = StandardScaler().fit(data[['theta_2']].values)
+    data.theta_2 = scaler_theta_2.transform(data[['theta_2']].values)
+    data2.theta_2 = scaler_theta_2.transform(data2[['theta_2']].values)
     
-    scaler_rate = StandardScaler().fit(data[['rate']])
-    data.rate = scaler_rate.transform(data[['rate']])
-    data2.rate = scaler_rate.transform(data2[['rate']])
+    scaler_rate = StandardScaler().fit(data[['rate']].values)
+    data.rate = scaler_rate.transform(data[['rate']].values)
+    data2.rate = scaler_rate.transform(data2[['rate']].values)
     
     #####################################
     # Load training and validation data #
@@ -342,7 +312,6 @@ for simID in simIDs:
     X_val = DimTrans(X_val)
     X_test = DimTrans(X_test)
     
-    
     # Transform into tensor
     X_train = X_train.astype('float')
     X_val = X_val.astype('float')
@@ -368,15 +337,15 @@ for simID in simIDs:
     
     counter = 0 # For earlystop
 
-    PATIENCE = 2
-    EPOCH = 100 
+    PATIENCE = 10
+    EPOCH = 500 
     BATCH_SIZE = 64
 
     losses = []
-    torch.manual_seed(123)    # reproducible
+    torch.manual_seed(123) # reproducible
 
     loss_func = nn.MSELoss()
-    optimizer = optimizers.Adam(model.parameters(), lr=0.001)#default is 0.001
+    optimizer = optimizers.Adam(model.parameters(), lr=0.001)
 
     # Dataloader
     train_len = X_train.size()[0]
@@ -402,7 +371,6 @@ for simID in simIDs:
         # Each epoch has a training and validation phase
         for phase in ['train', 'val']:
             if phase == 'train':
-                #optimizer = scheduler(optimizer, epoch)
                 model.train(True)  # Set model to training mode
             else:
                 model.train(False)  # Set model to evaluate mode
@@ -453,7 +421,7 @@ for simID in simIDs:
                     optimizer.step()
 
                 # print loss statistics
-                running_loss += loss.data.item() #[0]
+                running_loss += loss.data.item() 
 
             epoch_loss = running_loss / data_lengths[phase]
 
@@ -510,7 +478,7 @@ for simID in simIDs:
 
     pred_list = []
     for i in range(X_test.shape[0]):
-        for value in np.unique(data2.rate):
+        for value in range(int(np.min(data2.rate)), int(np.max(data2.rate)+1)):
             plot_list.append(str(int(plot[i,0])) + "_" + str(int(plot[i,1])))
             
             with torch.no_grad():
@@ -526,14 +494,14 @@ for simID in simIDs:
                 x7 = temp_X[:,7,:,:].unsqueeze(1)
 
                 x8 = np.array(value).astype('float')
-                x8 = scaler_rate.transform([[x8]]) # Standardize #Please chekc!!!!
+                x8 = scaler_rate.transform([[x8]]) 
                 x8 = torch.from_numpy(x8).float().view(-1,1)
                 x8 = x8.to(device)
 
                 pred = model(x0,x1,x2,x3,x4,x5,x6,x7,x8).detach().cpu().numpy().astype('float').reshape(-1).tolist()
             pred_list.extend(pred)
             
-        rate_list.extend(np.unique(data2.rate).tolist())
+        rate_list.extend(np.array(range(int(np.min(data2.rate)), int(np.max(data2.rate)+1))).tolist())
     
     sim_list = np.repeat(simID,len(plot_list))
     
@@ -554,5 +522,3 @@ matSummary = matSummary.T
 matSummary = pd.DataFrame(matSummary)
 matSummary.columns = labelSummary
 matSummary.to_csv('./output/summary.csv')
-
-

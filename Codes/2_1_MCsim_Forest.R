@@ -1,39 +1,36 @@
-# /*===== Run on R GUI =====*/
+# ==========================================================================
+# # /*===== Run on R GUI =====*/
+# ==========================================================================
 
 #/*----------------------------------*/
 #' ## Preparation
 #/*----------------------------------*/
-library(here)
 library(grf)
 library(data.table)
 library(tidyverse)
 library(future.apply)
 
-# === Load Functions === #
-setwd(here())
+# === Source Functions === #
+# NOTE: Please change the path in setwd()
+setwd("~/Dropbox/ResearchProject/CF_for_VRA/VRA_with_CF")
 source("./Codes/0_2_functions_main_sim.R")
 
-# === Load Data Sets === #
-reg_data_all <- readRDS("./Data/reg_data.rds")
-test_data_all <- readRDS("./Data/test_data.rds")
+# /*----------------------------------*/
+#' ## Datasets
+# /*----------------------------------*/
+# === prices ===#
+pCorn <- price_table[2, pCorn]
+pN <- price_table[2, pN]
 
 
 # /*=================================================*/
 #' # Simulation by scenarios
 # /*=================================================*/
-# + run 1000 simulations by individual scenarios
-# + the 1000 simulation results will be saved per each scenario
-
-# === Set up for Parallel Computations === #
-# --- Parallel implementation using the future_lapply --- #
+# === set up for parallel computations === #
 plan(multicore, workers = availableCores()-2)
 options(future.globals.maxSize= 850*1024^2)
 
-# --- Prices--- #
-pCorn <- price_table[2, pCorn]
-pN <- price_table[2, pN]
-
-# --- Modeling Scenario --- #
+# --- modeling scenario --- #
 var_ls_variations <- list(
     c("alpha", "beta", "ymax"),
     c("alpha", "beta", "ymax", "theta_1", "theta_2"),
@@ -44,9 +41,13 @@ var_ls_variations <- list(
 # --- Number of iterations --- #
 B=1000
 
-# === Start Simulations === #
+# --- Data --- #
+reg_data_all <- readRDS("./Data/reg_data.rds")
+test_data_all <- readRDS("./Data/test_data.rds")
+
+# === start simulations === #
+dir.create("./Data/Forest_rawRes")
 for (var in var_ls_variations){
-	# var = c("alpha", "beta", "ymax")
 	set.seed(1378)
 	# --- for each modeling scenario run: --- #
 	sim_results <- lapply(1:B, 
@@ -64,5 +65,3 @@ for (var in var_ls_variations){
 
 	saveRDS(sim_results, paste0("./Data/Forest_rawRes/forest_SimRes_", paste0(var, collapse = "_"), ".rds"))
 }
-
-
