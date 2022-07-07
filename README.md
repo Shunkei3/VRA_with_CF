@@ -5,7 +5,7 @@
 	* Shunkei Kakimoto
 		- Institution: Department of Agricultural Economics, University of Nebraska-Lincoln
 		- Address: 102 Filley Hall 1625 Arbor Drive Lincoln, NE 68583, USA 
-		- E-mail: skakimoto3@hunskers.unl.edu
+		- E-mail: skakimoto3@huskers.unl.edu
 
 + Co-authors Contact Information
 	* Taro Mieno
@@ -18,7 +18,7 @@
 		- Address: Gifu 501-1193, Japan
 		- E-mail: takashit@gifu-u.ac.jp
 	
-	* David S. Bullock
+	* David S Bullock
 		- Institution: Department of Agricultural and Consumer Economics, University of Illinois
 		- Address: Urbana, IL 61801, USA
 		- E-mail: dsbulloc@illinois.edu
